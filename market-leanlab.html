@@ -95,8 +95,9 @@ ul.m{margin:0;padding-left:18px;font-size:14px;color:var(--muted)}
 @media (max-width:640px){.pair{grid-template-columns:28px 84px 1fr 44px;font-size:13px}.trow{grid-template-columns:28px 84px 1fr 64px 48px;font-size:13px}.ini{width:28px;height:28px}}
 @media (max-width:640px){h2{font-size:22px}.hero{font-size:40px}.row,.div{grid-template-columns:28px 92px 1fr 64px;font-size:13px}.logo{width:28px;height:28px}.big2 .num{font-size:32px}.cmp .r{grid-template-columns:1fr 96px 1fr}.cmp .r .a,.cmp .r .b{font-size:16px}}
 .sumgrid{display:grid;gap:12px;grid-template-columns:1.7fr 1fr;align-items:stretch}.sumcol{display:grid;gap:12px}
-.piewrap{display:flex;align-items:center;gap:4px 14px;flex-wrap:wrap}.piewrap svg{flex:1 1 260px;width:100%;height:auto;max-height:250px}.pieleg{flex:0 1 150px;font-size:12.5px}
+.piewrap{display:flex;align-items:center;gap:4px 14px;flex-wrap:wrap}.piewrap svg{flex:1 1 260px;width:100%;height:auto;max-height:205px}.pieleg{flex:0 1 150px;font-size:12.5px}
 @media (max-width:760px){.sumgrid{grid-template-columns:1fr}.pieleg{flex:1 1 100%;columns:2;column-gap:18px}}
+.piewrap .slc{cursor:pointer;transition:opacity .15s}.piedet{margin-top:4px;padding:6px 10px;border-radius:10px;background:#f4f6fa;font-size:13px;line-height:1.45;min-height:48px}.piedet span{color:#56607a;font-size:12.5px}.piehint{margin-top:4px;font-size:12px;color:#8a92a6}
 </style></head><body>
 <header><div class="hl"><div class="brand">DIZCO · MARKET RESEARCH · SHOPEE + TIKTOK</div><h1>Lean Lab — Peta Pasar</h1></div><div class="hr"><a class="back" href="index.html">← Beranda</a></div></header>
 <div class="progress"><div class="bar"><i id="bar"></i></div><div class="dots" id="dots"></div></div>
@@ -130,14 +131,17 @@ const SCEN=()=>[['Dry rub Shopee: pangsa 22% → 30%',Math.round(coreTot*0.30-ll
   ['Dry rub TikTok: pangsa '+Math.round(llT.now/ttCoreTot*100)+'% → 20%',Math.round(ttCoreTot*0.20-llT.now),'Produk entry-level dan perluasan jaringan kreator affiliate.','#C2185B'],['Bumbu tabur TikTok: 5% pangsa kategori',Math.round(sum(ttTabur,'now')*0.05),'SKU yang sama, didistribusikan melalui kreator.','#F7A072']];
 function pie(){ const esc=v=>String(v??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])), pc=v=>Math.round(v*100)+"%", jt=v=>v>=1000?"Rp"+(v/1000).toFixed(2).replace(".",",")+" M":"Rp"+Math.round(v)+" jt", CL="Lean Lab", HAS_TT=true, D={short:["Dry rub"]}; const all = comb(), tot = sum(all, "tot"); if (!tot) return "";
   const TOPN = 7, top = all.slice(0, TOPN); if (!top.some(x => x.name === CL)) { const m = all.find(x => x.name === CL); if (m) top[TOPN - 1] = m; }
-  const rest = tot - sum(top, "tot"), sl = [...top.map(x => ({n:x.name, v:x.tot, me:x.name === CL}))]; if (rest > 0.5) sl.push({n:"Lainnya", v:rest});
+  const rest = tot - sum(top, "tot"), sl = [...top.map(x => ({n:x.name, v:x.tot, me:x.name === CL, sh:x.sh, tt:x.tt}))]; if (rest > 0.5) sl.push({n:"Lainnya", v:rest, cnt:all.length - top.length});
+  window.PIE_D = sl.map(x => { if (x.n === "Lainnya") return `<b>Lainnya</b> · ${x.cnt} brand lain · ${jt(x.v)} · ${pc(x.v / tot)}<br><span>Gabungan brand di luar ${TOPN} teratas.</span>`;
+    const t = ttCore.find(z => z.name === x.n), g = t ? gr(t) : null, rs = x.sh > 0 ? rankIn(core, x.n) : 0, rt = t ? rankIn(ttCore, x.n) : 0;
+    return `<b>${esc(x.n)}</b> · ${jt(x.v)} · ${pc(x.v / tot)} · #${all.findIndex(z => z.name === x.n) + 1} gabungan<br><span>Shopee ${x.sh > 0 ? `${jt(x.sh)} (#${rs})` : "–"}${HAS_TT ? ` · TikTok ${t ? `${jt(x.tt)} (#${rt}${g !== null ? ", " + pct(g) : ""})` : "–"}` : ""}${t && t.top ? ` · terlaris: ${esc(t.top)}${t.price ? " Rp" + nf(t.price) : ""}` : ""}</span>`; });
   const PAL = ["#1F2A44","#34466b","#4f6390","#6f82aa","#93a2c2","#b3bfd6","#ccd4e3","#e1e6ee"];
   const cx = 260, cy = 140, R = 116, r0 = 68; let a = -Math.PI / 2, paths = "", call = "", ci = 0, vb = `${cx - R - 14} ${cy - R - 14} ${2 * R + 28} ${2 * R + 28}`;
   const P = (ang, rad, ox = 0, oy = 0) => [cx + ox + Math.cos(ang) * rad, cy + oy + Math.sin(ang) * rad];
   sl.forEach(x => { const da = x.v / tot * Math.PI * 2, a1 = a + da, mid = a + da / 2, off = x.me ? 10 : 0, ox = Math.cos(mid) * off, oy = Math.sin(mid) * off;
     const [x1, y1] = P(a, R, ox, oy), [x2, y2] = P(a1, R, ox, oy), [x3, y3] = P(a1, r0, ox, oy), [x4, y4] = P(a, r0, ox, oy), big = da > Math.PI ? 1 : 0;
     const col = x.me ? "#F26B1D" : x.n === "Lainnya" ? "#e7e9ee" : PAL[Math.min(ci++, PAL.length - 1)];
-    paths += `<path d="M${x1},${y1} A${R},${R} 0 ${big} 1 ${x2},${y2} L${x3},${y3} A${r0},${r0} 0 ${big} 0 ${x4},${y4} Z" fill="${col}" stroke="#fff" stroke-width="2"><title>${esc(x.n)} · ${jt(x.v)} (${pc(x.v / tot)})</title></path>`;
+    paths += `<path d="M${x1},${y1} A${R},${R} 0 ${big} 1 ${x2},${y2} L${x3},${y3} A${r0},${r0} 0 ${big} 0 ${x4},${y4} Z" fill="${col}" stroke="#fff" stroke-width="2" class="slc" data-i="${sl.indexOf(x)}" onmouseenter="pieSel(${sl.indexOf(x)})" onclick="pieSel(${sl.indexOf(x)})"><title>${esc(x.n)} · ${jt(x.v)} (${pc(x.v / tot)})</title></path>`;
     if (x.me) { const [ax, ay] = P(mid, R + 12, ox, oy), right = Math.cos(mid) >= 0, by = Math.min(Math.max(ay + (Math.sin(mid) >= 0 ? 10 : -30), cy - R + 6), cy + R - 4);
       vb = right ? `${cx - R - 14} ${cy - R - 14} ${520 - cx + R + 14} ${2 * R + 48}` : `0 ${cy - R - 14} ${cx + R + 14} ${2 * R + 48}`;
       const lx = right ? 514 : 6, ux = right ? Math.min(ax + 20, 380) : Math.max(ax - 20, 140), anc = right ? "end" : "start";
@@ -146,14 +150,17 @@ function pie(){ const esc=v=>String(v??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<
       <text x="${lx}" y="${by + 18}" text-anchor="${anc}" font-size="14" font-weight="700" fill="#F26B1D">${jt(x.v)} · ${pc(x.v / tot)} · #${all.findIndex(z => z.name === CL) + 1}</text>`; }
     a = a1; });
   const legend = sl.map((x, i) => { const col = x.me ? "#F26B1D" : x.n === "Lainnya" ? "#e7e9ee" : PAL[Math.min(sl.slice(0, i).filter(z => !z.me && z.n !== "Lainnya").length, PAL.length - 1)];
-    return `<div style="display:flex;align-items:center;gap:8px;padding:1px 0;${x.me ? "font-weight:800;color:#F26B1D" : ""}"><span style="width:10px;height:10px;border-radius:3px;background:${col};flex:none;border:1px solid #d9dde5"></span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.n)}</span><span style="font-variant-numeric:tabular-nums">${pc(x.v / tot)}</span></div>`; }).join("");
+    return `<div class="lgi" data-i="${i}" onmouseenter="pieSel(${i})" onclick="pieSel(${i})" style="display:flex;align-items:center;gap:8px;padding:1px 4px;border-radius:6px;cursor:pointer;${x.me ? "font-weight:800;color:#F26B1D" : ""}"><span style="width:10px;height:10px;border-radius:3px;background:${col};flex:none;border:1px solid #d9dde5"></span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.n)}</span><span style="font-variant-numeric:tabular-nums">${pc(x.v / tot)}</span></div>`; }).join("");
   return `<div class="piewrap"><svg viewBox="${vb}" role="img" aria-label="Pangsa pasar per brand">
   <defs><marker id="arw" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#F26B1D"/></marker></defs>
   ${paths}<text x="${cx}" y="${cy - 4}" text-anchor="middle" font-size="22" font-weight="800" fill="#1F2A44">${jt(tot)}</text><text x="${cx}" y="${cy + 16}" text-anchor="middle" font-size="12" fill="#6b7385">per bulan</text>${call}</svg>
-  <div class="pieleg">${legend}</div></div>`; }
+  <div class="pieleg">${legend}</div></div><div class="piedet" id="piedet">${PIE_D[Math.max(sl.findIndex(x => x.me), 0)]}</div>`; }
+window.pieSel = i => { const d = document.getElementById("piedet"); if (!d || !window.PIE_D) return; d.innerHTML = PIE_D[i];
+  document.querySelectorAll(".piewrap .slc").forEach(p => p.style.opacity = +p.dataset.i === i ? 1 : .35);
+  document.querySelectorAll(".piewrap .lgi").forEach(r => r.style.background = +r.dataset.i === i ? "#eef1f6" : ""); };
 const SL = [
  {t:'Ringkasan', html:()=>`<div class="kicker">Ringkasan eksekutif</div><h2>Ringkasan</h2><p class="sub">Snapshot omzet 30 hari: Shopee (s.d. 26 Sep 2026) dan TikTok Shop (27 Agu–25 Sep 2026). Semua angka estimasi riset pasar.</p>
-   <div class="sumgrid"><div class="card ans"><div class="q">Ukuran pasar · dry rub · Shopee + TikTok Shop</div>${pie()}<p style="margin-top:4px">Dry rub rendah kalori per bulan di Shopee dan TikTok Shop. Kedua channel sedikit terkoreksi.</p></div>
+   <div class="sumgrid"><div class="card ans"><div class="q">Ukuran pasar · dry rub · Shopee + TikTok Shop</div>${pie()}<p class="piehint">Hover / klik kepingan atau nama brand untuk detail · kedua channel sedikit terkoreksi.</p></div>
    <div class="sumcol">
    <div class="card ans"><div class="q">Posisi Lean Lab</div><div class="v">#1 / #${rankIn(ttCore,'Lean Lab')}</div><p>#1 di Shopee (${Math.round(ll.now/coreTot*100)}%), namun #${rankIn(ttCore,'Lean Lab')} di TikTok (${Math.round(llT.now/ttCoreTot*100)}%). Gabungan #${comb().findIndex(x=>x.name==='Lean Lab')+1}.</p></div>
    <div class="card ans"><div class="q">Potensi tambahan</div><div class="v">+Rp${SCEN().reduce((a,s)=>a+s[1],0)} jt</div><p>Dari penguatan TikTok Shop dan ekspansi bumbu tabur di kedua channel.</p></div></div></div>

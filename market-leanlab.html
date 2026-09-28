@@ -98,7 +98,7 @@ ul.m{margin:0;padding-left:18px;font-size:14px;color:var(--muted)}
 .piewrap{display:flex;align-items:center;gap:4px 14px;flex-wrap:wrap}.piewrap svg{flex:1 1 260px;width:100%;height:auto;max-height:205px}.pieleg{flex:0 1 150px;font-size:12.5px}
 @media (max-width:760px){.sumgrid{grid-template-columns:1fr}.pieleg{flex:1 1 100%;columns:2;column-gap:18px}}
 .piewrap .slc{cursor:pointer;transition:opacity .15s}.piedet{margin-top:4px;padding:6px 10px;border-radius:10px;background:#f4f6fa;font-size:13px;line-height:1.45;min-height:48px}.piedet span{color:#56607a;font-size:12.5px}.piehint{margin-top:4px;font-size:12px;color:#8a92a6}
-</style></head><body>
+.means .mh{font-weight:700;color:var(--navy);margin-bottom:2px}.means ul.mb{margin:4px 0 0;padding-left:20px}.means ul.mb li{margin:3px 0}.means ul.mb li::marker{color:var(--orange)}</style></head><body>
 <header><div class="hl"><div class="brand">DIZCO · MARKET RESEARCH · SHOPEE + TIKTOK</div><h1>Lean Lab — Peta Pasar</h1></div><div class="hr"><a class="back" href="index.html">← Beranda</a></div></header>
 <div class="progress"><div class="bar"><i id="bar"></i></div><div class="dots" id="dots"></div></div>
 <main id="main"></main>
@@ -247,4 +247,19 @@ function go(i){ cur=Math.max(0,Math.min(N-1,i));
 document.addEventListener('click',e=>{ const g=e.target.closest('[data-go]'); if(g) return go(+g.dataset.go); if(e.target.id==='prev') go(cur-1); if(e.target.id==='next') go(cur+1); });
 document.addEventListener('keydown',e=>{ if(e.key==='ArrowRight') go(cur+1); if(e.key==='ArrowLeft') go(cur-1); });
 const h=parseInt((location.hash||'#1').slice(1)); go(isNaN(h)?0:h-1);
-</script></body></html>
+</script><script>
+(function tidyText(){
+  var SPLIT=/(?<!s\.d)\.\s+(?=(?:<b>)?[A-Z±«"(])/g;
+  function parts(h){return h.replace(SPLIT,'.\u0001').split('\u0001').map(function(x){return x.trim()}).filter(function(x){return x.length>1})}
+  document.querySelectorAll('.means').forEach(function(m){
+    var h=m.innerHTML.trim(),lab='';
+    var mm=h.match(/^<b>([^<]{2,20}):<\/b>\s*/);if(mm){lab=mm[1];h=h.slice(mm[0].length)}
+    var ps=parts(h);if(ps.length<2&&m.textContent.length<140)return;
+    m.innerHTML=(lab?'<div class="mh">'+lab+'</div>':'')+'<ul class="mb">'+ps.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul>';
+  });
+  document.querySelectorAll('.sub').forEach(function(p){
+    if(p.textContent.length<115)return;var ps=parts(p.innerHTML.trim());if(ps.length>1)p.innerHTML=ps.join('<br>');
+  });
+})();
+</script>
+</body></html>

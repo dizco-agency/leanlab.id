@@ -87,6 +87,13 @@ td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .btn{border:0;border-radius:10px;padding:10px 18px;font:inherit;font-weight:600;font-size:14px;cursor:pointer}
 .btn.prev{background:var(--bg);color:var(--navy)}.btn.next{background:var(--navy);color:#fff}.btn:disabled{opacity:.35;cursor:default}
 @media(max-width:640px){h2{font-size:22px}.funnel .r{grid-template-columns:48px 1fr 96px;font-size:13px}.dr{grid-template-columns:minmax(0,1.4fr) 1fr 80px;font-size:13px}.tile .v{font-size:26px}}
+
+.mh{font-weight:700;color:var(--navy);margin-bottom:2px}
+ul.mb,ul.tb{margin:4px 0 0;padding-left:20px}ul.mb li,ul.tb li{margin:3px 0}
+ul.mb li::marker,ul.tb li::marker{color:var(--orange,#F26B1D)}
+.card ul.tb{font-size:14px;color:var(--muted)}
+.dd summary{display:grid!important;grid-template-columns:auto 1fr;column-gap:8px;align-items:start}
+.dd summary .ddsub{grid-column:2;margin-left:0!important;justify-self:start}
 </style></head><body>
 <header><div><div class="brand">DIZCO · PERFORMA KONTEN</div><h1>Lean Lab — Performa Konten</h1></div><a href="index.html">← Beranda</a></header>
 <div class="dummy" id="dummy" hidden>Data contoh (dummy) untuk gambaran format laporan.</div>
@@ -196,4 +203,28 @@ function go(i){ cur = Math.max(0, Math.min(N - 1, i));
 document.addEventListener("click", e => { const g = e.target.closest("[data-go]"); if (g) return go(+g.dataset.go); if (e.target.id === "prev") go(cur - 1); if (e.target.id === "next") go(cur + 1); });
 document.addEventListener("keydown", e => { if (e.target.tagName === "SELECT") return; if (e.key === "ArrowRight") go(cur + 1); if (e.key === "ArrowLeft") go(cur - 1); });
 const h = parseInt((location.hash || "#1").slice(1)); go(isNaN(h) ? 0 : h - 1);
+</script><script>
+(function tidyText(){
+  var SPLIT=/(?<!s\.d|\bvs|\bdll|\bmis)\.\s+(?=(?:<b>)?[A-Z0-9±«"(])/g;
+  function parts(h){return h.replace(/<br\s*\/?>/gi,'\u0001').replace(SPLIT,'.\u0001').split('\u0001').map(function(x){return x.trim()}).filter(function(x){return x.length>1})}
+  function ul(ps,c){return '<ul class="'+c+'">'+ps.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul>'}
+  document.querySelectorAll('.means').forEach(function(m){
+    if(m.querySelector('ul'))return;
+    var h=m.innerHTML.trim(),lab='';
+    var mm=h.match(/^<b>([^<]{2,24}):<\/b>\s*/);if(mm){lab=mm[1];h=h.slice(mm[0].length)}
+    var ps=parts(h);if(ps.length<2&&m.textContent.length<140)return;
+    m.innerHTML=(lab?'<div class="mh">'+lab+'</div>':'')+ul(ps,'mb');
+  });
+  document.querySelectorAll('.ddb').forEach(function(b){
+    if(b.querySelector('ul,ol,table,figure,iframe,img,.chart'))return;
+    var ps=parts(b.innerHTML.trim());if(ps.length>1)b.innerHTML=ul(ps,'tb');
+  });
+  document.querySelectorAll('.card p').forEach(function(p){
+    if(p.closest('.means')||p.textContent.length<90)return;
+    var ps=parts(p.innerHTML.trim());if(ps.length>1)p.outerHTML=ul(ps,'tb');
+  });
+  document.querySelectorAll('.sub').forEach(function(p){
+    if(p.textContent.length<100)return;var ps=parts(p.innerHTML.trim());if(ps.length>1)p.innerHTML=ps.join('<br>');
+  });
+})();
 </script></body></html>
